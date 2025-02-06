@@ -43,7 +43,7 @@ class ProductFactory(factory.Factory):
             "Ford",
             "Chevy",
             "Hammer",
-            "Wrench"
+            "Wrench",
         ]
     )
     description = factory.Faker("text")

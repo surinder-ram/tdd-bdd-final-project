@@ -73,8 +73,13 @@ class TestProductModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """It should Create a product and assert that it exists"""
-        product = Product(name="Fedora", description="A red hat",
-                          price=12.50, available=True, category=Category.CLOTHS)
+        product = Product(
+            name="Fedora",
+            description="A red hat",
+            price=12.50,
+            available=True,
+            category=Category.CLOTHS,
+        )
         self.assertEqual(str(product), "<Product Fedora id=[None]>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -136,8 +141,7 @@ class TestProductModel(unittest.TestCase):
         app.logger.info("Product created with ID: %s", product.id)
         # Fetch it back
         found_product = Product.find(product.id)
-        app.logger.info("Product fetched from database: %s",
-                        repr(found_product))
+        app.logger.info("Product fetched from database: %s", repr(found_product))
         self.assertEqual(found_product.id, product.id)
         self.assertEqual(found_product.name, product.name)
         self.assertEqual(found_product.description, product.description)
@@ -202,8 +206,7 @@ class TestProductModel(unittest.TestCase):
         for product in products:
             product.create()
         available = products[0].available
-        count = len(
-            [product for product in products if product.available == available])
+        count = len([product for product in products if product.available == available])
         found = Product.find_by_availability(available)
         self.assertEqual(found.count(), count)
         for product in found:
@@ -215,8 +218,7 @@ class TestProductModel(unittest.TestCase):
         for product in products:
             product.create()
         category = products[0].category
-        count = len(
-            [product for product in products if product.category == category])
+        count = len([product for product in products if product.category == category])
         found = Product.find_by_category(category)
         self.assertEqual(found.count(), count)
         for product in found:
@@ -225,12 +227,11 @@ class TestProductModel(unittest.TestCase):
     def test_find_by_price(self):
         """Test finding products by price"""
         # Create products with different prices
-        product1 = ProductFactory(price=Decimal('19.99'))
-        product2 = ProductFactory(price=Decimal('29.99'))
-        product3 = ProductFactory(price=Decimal('19.99'))
+        product1 = ProductFactory(price=Decimal("19.99"))
+        product2 = ProductFactory(price=Decimal("29.99"))
+        product3 = ProductFactory(price=Decimal("19.99"))
 
-        app.logger.info(
-            "Creating products for testing find by price operation.")
+        app.logger.info("Creating products for testing find by price operation.")
         product1.create()
         product2.create()
         product3.create()
@@ -240,10 +241,13 @@ class TestProductModel(unittest.TestCase):
         app.logger.info("Products created and verified in database.")
 
         # Test finding products by price
-        price_to_test = Decimal('19.99')
+        price_to_test = Decimal("19.99")
         products = Product.find_by_price(price_to_test).all()
-        app.logger.info("Products fetched with price %s: %s",
-                        price_to_test, [repr(p) for p in products])
+        app.logger.info(
+            "Products fetched with price %s: %s",
+            price_to_test,
+            [repr(p) for p in products],
+        )
 
         # Assertions
         self.assertEqual(len(products), 2)
@@ -259,15 +263,25 @@ class TestProductModel(unittest.TestCase):
 
     def test_update_without_id(self):
         """Test that update() raises an exception when id is not set."""
-        product = Product(name="Test Product", description="Test Description",
-                          price=10.0, available=True, category="FOOD")
+        product = Product(
+            name="Test Product",
+            description="Test Description",
+            price=10.0,
+            available=True,
+            category="FOOD",
+        )
         with self.assertRaises(DataValidationError):
             product.update()  # should raise exception since id is None
 
     def test_update_with_id(self):
         """Test that update() works when id is set."""
-        product = Product(name="Test Product", description="Test Description",
-                          price=10.0, available=True, category="FOOD")
+        product = Product(
+            name="Test Product",
+            description="Test Description",
+            price=10.0,
+            available=True,
+            category="FOOD",
+        )
         product.create()  # this will set the id
         product.name = "Updated Product"
         product.update()  # should work without errors
@@ -275,6 +289,7 @@ class TestProductModel(unittest.TestCase):
 
 
 class TestProductDeserialization(unittest.TestCase):
+    """additional class for testing the deseralization errors"""
     def test_invalid_available_type(self):
         """Test to check if DataValidationError is raised when 'available' is not a boolean."""
 
@@ -284,7 +299,7 @@ class TestProductDeserialization(unittest.TestCase):
             "description": "A test product description",
             "price": "19.99",
             "available": "yes",  # Ungültiger Wert, sollte ein boolescher Wert sein
-            "category": "CATEGORY_NAME"
+            "category": "CATEGORY_NAME",
         }
 
         product = Product()  # Instanziiere ein Product-Objekt
@@ -293,7 +308,8 @@ class TestProductDeserialization(unittest.TestCase):
 
         # Überprüfe, ob der Fehler den richtigen Fehlertext enthält
         self.assertTrue(
-            'Invalid type for boolean [available]' in str(context.exception))
+            "Invalid type for boolean [available]" in str(context.exception)
+        )
 
     def test_missing_name_field(self):
         """Test to check if DataValidationError is raised when 'name' is missing."""
@@ -303,15 +319,14 @@ class TestProductDeserialization(unittest.TestCase):
             "description": "A test product description",
             "price": "19.99",
             "available": True,
-            "category": "CATEGORY_NAME"
+            "category": "CATEGORY_NAME",
         }
 
         product = Product()
         with self.assertRaises(DataValidationError) as context:
             product.deserialize(invalid_data)
 
-        self.assertTrue(
-            'Invalid product: missing name' in str(context.exception))
+        self.assertTrue("Invalid product: missing name" in str(context.exception))
 
     def test_deserialize_missing_attribute(self):
         """Test that deserialize() raises an exception when an attribute is missing."""
@@ -331,7 +346,7 @@ class TestProductDeserialization(unittest.TestCase):
             "description": "Test Description",
             "price": "10.0",
             "available": "yes",  # Invalid type (string instead of boolean)
-            "category": "FOOD"
+            "category": "FOOD",
         }
         product = Product()
         with self.assertRaises(DataValidationError):
@@ -344,7 +359,7 @@ class TestProductDeserialization(unittest.TestCase):
             "description": "Test Description",
             "price": "10.0",
             "available": True,
-            "category": "INVALID_CATEGORY"  # Invalid category
+            "category": "INVALID_CATEGORY",  # Invalid category
         }
         product = Product()
         with self.assertRaises(DataValidationError):
@@ -357,7 +372,7 @@ class TestProductDeserialization(unittest.TestCase):
             "description": "Test Description",
             "price": "10.0",
             "available": True,
-            "category": "FOOD"
+            "category": "FOOD",
         }
         product = Product()
         product.deserialize(data)
